@@ -9,8 +9,7 @@
 #include "DHT.h"
 
 //Sub component values examples
-#define SUB_COMPONENT_STANZA        100
-#define SUB_COMPONENT_VASO          101
+#define SUB_COMPONENT_DEFAULT       255
 
 #define PIN_SDCARD_CS               4
 #define PIN_BOARD_STATUS            9
