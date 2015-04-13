@@ -1,0 +1,30 @@
+##############################################
+# Syntax Coloring Map For CloudMonitor24Eth  #
+##############################################
+
+####################
+# Class (KEYWORD3)
+####################
+
+CloudMonitor24Eth	KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+logVariable	KEYWORD2
+logAlarm	KEYWORD2
+setSdCardFolder	KEYWORD2
+
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+CM24_FRAME_TYPE_IDENTIFYING	LITERAL1
+VAR_ID_TEMPERATURE	LITERAL1
+VAR_ID_HUMIDITY	LITERAL1
+VAR_ID_PRESSURE	LITERAL1
+VAR_ID_SOLAR_RADIATON	LITERAL1
