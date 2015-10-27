@@ -41,6 +41,8 @@
 #define VAR_ID_DEVICE_ANALOG_IN7  66
 #define VAR_ID_DEVICE_ANALOG_IN8  67
 
+#define ALARM_ID_USER_ALARM       9
+
 #pragma pack(1)
 
 typedef struct 
@@ -57,7 +59,8 @@ typedef struct
 typedef struct 
 {
   byte start;
-  byte data[15];
+  byte ftype;
+  byte data[14];
   byte chk;
   byte end;
 } Cm24FrameData;
@@ -77,20 +80,20 @@ class CloudMonitor24Eth
   public:
 
     // Setup functions
-    CloudMonitor24Eth(const char *username, const char *password);
+    CloudMonitor24Eth(const char *identifier, const char *token);
     void setSdCardFolder(String sdCardFilePath);
-    void begin(String sdCardFilePath, const int chipSelect, Client &channel);
+    boolean begin(String sdCardFilePath, const int chipSelect, Client &channel);
 
     // Lopp functions
     void loop();
     boolean logVariable(uint32_t var_id, float value, uint16_t subcomp);
-    boolean logAlarm(uint32_t alarm_id, float alarm_info, uint16_t subcomp);
+    boolean logAlarm(uint32_t alarm_id, uint32_t alarm_info, uint16_t subcomp);
 
   private:
     
     uint32_t getLininoTimestamp();
     byte readFrameFromSocket();
-    boolean writeDataToNetwork(byte *buffer, byte size );
+    boolean writeDataToNetwork(byte *buffer, byte size, byte ftype);
   	byte getChecksum(byte *buffer, byte size);
     void stateLogging();
     uint16_t sadd16(uint16_t a, uint16_t b);
@@ -98,7 +101,8 @@ class CloudMonitor24Eth
     void calcLocalTimestamp();
     int freeRam();
 
-    DataFifo *_fifo;
+    DataFifo *_fifo_alarms;
+    DataFifo *_fifo_vars;
     Cm24FrameIdentifier _startFrame;
     Cm24FrameData _dataFrame;
     Cm24FrameEmpty _emptyFrame;

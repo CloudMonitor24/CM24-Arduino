@@ -3,35 +3,32 @@
 #include <SD.h>
 
 // Local defines
-#define QUEUE_FILE_NAME       "/q.txt"
-#define POINTER_FILE_NAME     "/p.txt"
+#define QUEUE_FILE_NAME       "/queue.txt"
+#define POINTER_FILE_NAME     "/pointer.txt"
 #define CM24_SYNC_CHARACTER   0x55
 
-#define DEBUG_MODE 1
+//#define SD_DATA_FIFO_DEBUG_ON
 
-
-SdDataFifo::SdDataFifo(String workingFolderPath, const int chipSelect)
+SdDataFifo::SdDataFifo(String workingFolderPath)
 {
 
+  //Remove end slash if exist
   if (workingFolderPath.endsWith("/"))
   {
-    workingFolderPath.remove( workingFolderPath.length() - 2 );
+    workingFolderPath.remove( workingFolderPath.length() - 1 );
   }
-   
-  _queue_file = workingFolderPath + QUEUE_FILE_NAME;
-  _pointer_file = workingFolderPath + POINTER_FILE_NAME; 
 
+  _queue_file = workingFolderPath + QUEUE_FILE_NAME;
+  _pointer_file = workingFolderPath + POINTER_FILE_NAME;
+  
   // Note: the actual mechanism to acquire time, cannot grant time to be equal between
   // one boot and the next one. We just remove and lose data because it probably would have a wrong timestamp.
 
-  // see if the card is present and can be initialized:
-  if (SD.begin(chipSelect))
-  {
-    // Create directory if missing
-    SD.mkdir((char *)workingFolderPath.c_str());
-    SD.remove((char *) _pointer_file.c_str());
-    SD.remove((char *) _queue_file.c_str());
-  }  
+  //TODO: find a way to check if SD.begin is already called (it can’t be called multiple times!)
+  // Create directory if missing
+  SD.mkdir((char *)workingFolderPath.c_str());    
+  SD.remove((char *) _pointer_file.c_str());
+  SD.remove((char *) _queue_file.c_str());
 }
 
 boolean SdDataFifo::push_data(byte *data, byte size)
@@ -49,7 +46,8 @@ boolean SdDataFifo::push_data(byte *data, byte size)
     return true;
   }
   else
-  {    
+  {
+    //Serial.println("SdDataFifo::push_data SD.open( "+_queue_file+" ) failed!");
     return false;
   }  
 }

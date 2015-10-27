@@ -8,7 +8,7 @@ class SdDataFifo : public DataFifo
 {
   public:
     
-    SdDataFifo(String sdCardFilePath, const int chipSelect);
+    SdDataFifo(String sdCardFilePath);
 
     // Method overridden
     boolean push_data(byte *data, byte size);
@@ -22,7 +22,6 @@ class SdDataFifo : public DataFifo
 
     String _queue_file;
     String _pointer_file;
-
 };
 
 #endif

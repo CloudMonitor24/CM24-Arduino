@@ -2,7 +2,7 @@
 #define DataFifo_h
 
 // NOTE: max value supported is 255!
-#define CM24_MAX_MESSAGE_SIZE	15
+#define CM24_MAX_MESSAGE_SIZE	14
 
 #include <Arduino.h>
 

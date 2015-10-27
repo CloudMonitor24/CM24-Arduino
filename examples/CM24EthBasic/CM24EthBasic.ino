@@ -9,7 +9,7 @@
 #include "DHT.h"
 
 //Sub component values examples
-#define SUB_COMPONENT_DEFAULT       0
+#define SENSOR_ID_DEFAULT       0
 
 #define PIN_SDCARD_CS               4
 #define PIN_BOARD_STATUS            9
@@ -23,7 +23,7 @@
 #define DHTTYPE        DHT11  // DHT 11 
 
 //Variables CM24
-CloudMonitor24Eth cm24("YOUR-USERNAME","YOUR-PASSWORD");
+CloudMonitor24Eth cm24("YOUR-IDENTIFIER","YOUR-TOKEN");
 EthernetClient client;
 DHT dht(DHT_PIN, DHTTYPE);
 
@@ -97,7 +97,7 @@ void loop()
   {
         lastSaving = millis();
      
-        if(!cm24.logVariable( VAR_ID_TEMPERATURE, temperature/temperature_samples, SUB_COMPONENT_STANZA))
+        if(!cm24.logVariable( VAR_ID_TEMPERATURE, temperature/temperature_samples, SENSOR_ID_STANZA))
         {
             Serial.println("Error log varTemp");
         }
@@ -106,7 +106,7 @@ void loop()
           Serial.println("Logged temp");
         }
 
-        if(!cm24.logVariable( VAR_ID_HUMIDITY, humidity/humidity_samples, SUB_COMPONENT_STANZA))
+        if(!cm24.logVariable( VAR_ID_HUMIDITY, humidity/humidity_samples, SENSOR_ID_STANZA))
         {
             Serial.println("Error log varHum");
         }
@@ -115,7 +115,7 @@ void loop()
           Serial.println("Logged humidity");
         }
         
-        if(!cm24.logVariable( VAR_ID_HUMIDITY, moisture/moisture_samples, SUB_COMPONENT_VASO)) //TODO create subcomponent for moisture..
+        if(!cm24.logVariable( VAR_ID_HUMIDITY, moisture/moisture_samples, SENSOR_ID_VASO)) //TODO create subcomponent for moisture..
         {
             Serial.println("Error log varMoist");
         }
@@ -124,7 +124,7 @@ void loop()
           Serial.println("Logged moist");
         }
 
-        if(!cm24.logVariable( VAR_ID_SOLAR_RADIATON, light/light_samples, SUB_COMPONENT_STANZA))
+        if(!cm24.logVariable( VAR_ID_SOLAR_RADIATON, light/light_samples, SENSOR_ID_STANZA))
         {
             Serial.println("Error log varLight");
         }else

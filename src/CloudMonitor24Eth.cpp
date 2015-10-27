@@ -1,6 +1,6 @@
 #include <SdDataFifo.h>
 #include <CloudMonitor24Eth.h>
-
+#include <SD.h>
 #include <SPI.h>
 
 // Local defines
@@ -15,7 +15,6 @@
 
 #define CM24_FRAME_TYPE_ALARM           100
 #define CM24_FRAME_TYPE_VARIABLE        101
-#define CM24_FRAME_TYPE_COMMAND         102 //To be implemented - Features
 
 #define CM24_MAGIC_START_CH             0x55
 #define CM24_MAGIC_END_CH               0xAA
@@ -25,6 +24,8 @@
 #define CM24_TIMEOUT_SEND_KEEP_ALIVE    240000  // millis (4 minutes)
 #define CM24_TIMEOUT_WAIT_ACK           10000   // millis
 #define CM24_TIMEOUT_WAIT_RECONNECT     60000   // millis
+
+#define FRAME_DATA_SIZE     14
 
 typedef enum
 {
@@ -42,7 +43,7 @@ typedef enum
   CM24_SOCKET_WAIT_END
 } SocketReadBufferState_e;
 
-CloudMonitor24Eth::CloudMonitor24Eth(const char *username, const char *password)
+CloudMonitor24Eth::CloudMonitor24Eth(const char *identifier, const char *token)
 {
     int i;
 
@@ -55,28 +56,28 @@ CloudMonitor24Eth::CloudMonitor24Eth(const char *username, const char *password)
     _dataFrame.start = CM24_MAGIC_START_CH;
     _dataFrame.end = CM24_MAGIC_END_CH;
 
-    // Fill username
-    for(i=0; i<strlen(username); i++)
+    // Fill identifier
+    for(i=0; i<strlen(identifier); i++)
     {
         if (i>=16)
         {
             break;
         }
-        _startFrame.identifier[i] = username[i];
+        _startFrame.identifier[i] = identifier[i];
     }
     for(; i<16; i++)
     {
         _startFrame.identifier[i] = '\0';   
     }
 
-    // Fill password
-    for(i=0; i<strlen(password); i++)
+    // Fill token
+    for(i=0; i<strlen(token); i++)
     {
         if (i>=16)
         {
             break;
         }
-        _startFrame.passcode[i] = password[i];
+        _startFrame.passcode[i] = token[i];
     }
     for(; i<16; i++)
     {
@@ -86,7 +87,6 @@ CloudMonitor24Eth::CloudMonitor24Eth(const char *username, const char *password)
     //Init empty frame
     _emptyFrame.start = CM24_MAGIC_START_CH;
     _emptyFrame.end = CM24_MAGIC_END_CH;
-
 
 }
 
@@ -104,9 +104,8 @@ void CloudMonitor24Eth::loop()
     // Calculate current timestamp, depending on delta between current and previous reading
     calcLocalTimestamp();
 
-
-    switch(_cm24LoggerState){
-
+    switch(_cm24LoggerState)
+    {
         case CM24_WAIT_CONNECT:
         {
             if(_channel->connected())
@@ -137,8 +136,11 @@ void CloudMonitor24Eth::loop()
                     _cm24LoggerState = CM24_WAIT_RECONNECT;
                     startWaitingTimeReconnect = millis();                    
                 }
+                else
+                {
+                    //channel-> CONNECTED!
+                }
             }
-
             break;
         }
 
@@ -146,12 +148,20 @@ void CloudMonitor24Eth::loop()
         {
             if(_channel->connected())
             {
+                //Check for alarms
                 byte size;
-                byte *buffer = _fifo->pop_data(&size);
+                byte *buffer = _fifo_alarms->pop_data(&size);
+                byte frameType = CM24_FRAME_TYPE_ALARM;
+
+                if(!(size > 0)) //alarms not available? then pop var
+                {
+                    buffer = _fifo_vars->pop_data(&size);
+                    frameType = CM24_FRAME_TYPE_VARIABLE;
+                }
                 
                 if(size > 0) //data available?
                 {                    
-                    if(writeDataToNetwork(buffer, size))
+                    if(writeDataToNetwork(buffer, size, frameType))
                     {
                         //data sent successfully
                         _cm24LoggerState = CM24_WAIT_ACK;
@@ -254,12 +264,12 @@ void CloudMonitor24Eth::loop()
                                 }
                                 case CM24_FRAME_TYPE_ALARM:
                                 {
-                                    _fifo->increment_pointer(lastFrameSizeSent);
+                                    _fifo_alarms->increment_pointer(lastFrameSizeSent);
                                     break;
                                 }
                                 case CM24_FRAME_TYPE_VARIABLE:
                                 {
-                                    _fifo->increment_pointer(lastFrameSizeSent);
+                                    _fifo_vars->increment_pointer(lastFrameSizeSent);
                                     break;
                                 }
                                 
@@ -299,7 +309,7 @@ void CloudMonitor24Eth::loop()
         }
 
         case CM24_WAIT_RECONNECT:
-        {
+        {          
             if( (millis() - startWaitingTimeReconnect) > CM24_TIMEOUT_WAIT_RECONNECT )
             {
                 _cm24LoggerState = CM24_WAIT_CONNECT;
@@ -314,78 +324,89 @@ void CloudMonitor24Eth::loop()
     }
 }
 
-void CloudMonitor24Eth::begin(String sdCardFilePath, const int chipSelect, Client &client)
+boolean CloudMonitor24Eth::begin(String sdCardFilePath, const int chipSelect, Client &client)
 {
-    _fifo = (SdDataFifo *) new SdDataFifo(sdCardFilePath, chipSelect);
-    _channel = &client;
+    //Add end slash if not exist
+    if (sdCardFilePath.endsWith("/"))
+    {
+        sdCardFilePath.remove( sdCardFilePath.length() - 1 );
+    }
+
+    // see if the card is present and can be initialized
+    // NOTE: SD.begin have to be called only one time in all application
+    if(SD.begin(chipSelect))
+    {
+        _fifo_alarms = (SdDataFifo *) new SdDataFifo(sdCardFilePath+"/ALARMS");
+        _fifo_vars = (SdDataFifo *) new SdDataFifo(sdCardFilePath+"/VARS");
+        _channel = &client;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 boolean CloudMonitor24Eth::logVariable(uint32_t var_id, float value, uint16_t subcomp)
 {
-    static byte buffer[15];
-
-    // Frame type
-    buffer[0] = CM24_FRAME_TYPE_VARIABLE;
+    static byte buffer[FRAME_DATA_SIZE];
 
     // Subcomp
-    buffer[1] = subcomp & 0xFF;
-    buffer[2] = (subcomp >> 8) & 0xFF;
+    buffer[0] = subcomp & 0xFF;
+    buffer[1] = (subcomp >> 8) & 0xFF;
 
     // Var id
-    buffer[3] = var_id & 0xFF;
-    buffer[4] = (var_id >> 8) & 0xFF;
-    buffer[5] = (var_id >> 16) & 0xFF;
-    buffer[6] = (var_id >> 24) & 0xFF;
+    buffer[2] = var_id & 0xFF;
+    buffer[3] = (var_id >> 8) & 0xFF;
+    buffer[4] = (var_id >> 16) & 0xFF;
+    buffer[5] = (var_id >> 24) & 0xFF;
 
     // Value
     byte *float_pt = (byte *) &value;
+    buffer[6] = *float_pt++;
     buffer[7] = *float_pt++;
     buffer[8] = *float_pt++;
-    buffer[9] = *float_pt++;
-    buffer[10] = *float_pt;
+    buffer[9] = *float_pt;
 
     // Timestamp
     uint32_t time = _localTimestamp;
-    buffer[11] = time & 0xFF;
-    buffer[12] = (time >> 8) & 0xFF;
-    buffer[13] = (time >> 16) & 0xFF;
-    buffer[14] = (time >> 24) & 0xFF;
+    buffer[10] = time & 0xFF;
+    buffer[11] = (time >> 8) & 0xFF;
+    buffer[12] = (time >> 16) & 0xFF;
+    buffer[13] = (time >> 24) & 0xFF;
 
-    return _fifo->push_data( buffer, 15 );
+    return _fifo_vars->push_data( buffer, FRAME_DATA_SIZE );
 }
     
-boolean CloudMonitor24Eth::logAlarm(uint32_t alarm_id, float alarm_info, uint16_t subcomp)
+boolean CloudMonitor24Eth::logAlarm(uint32_t alarm_id, uint32_t alarm_info, uint16_t subcomp)
 {
-    byte buffer[15];
-
-    // Frame type
-    buffer[0] = CM24_FRAME_TYPE_ALARM;
+    byte buffer[FRAME_DATA_SIZE];
 
     // Subcomp
-    buffer[1] = subcomp & 0xFF;
-    buffer[2] = (subcomp >> 8) & 0xFF;
+    buffer[0] = subcomp & 0xFF;
+    buffer[1] = (subcomp >> 8) & 0xFF;
 
     // Alarm id
-    buffer[3] = alarm_id & 0xFF;
-    buffer[4] = (alarm_id >> 8) & 0xFF;
-    buffer[5] = (alarm_id >> 16) & 0xFF;
-    buffer[6] = (alarm_id >> 24) & 0xFF;
+    buffer[2] = alarm_id & 0xFF;
+    buffer[3] = (alarm_id >> 8) & 0xFF;
+    buffer[4] = (alarm_id >> 16) & 0xFF;
+    buffer[5] = (alarm_id >> 24) & 0xFF;
 
     // Alarm Info
     byte *float_pt = (byte *) &alarm_info;
+    buffer[6] = *float_pt++;
     buffer[7] = *float_pt++;
     buffer[8] = *float_pt++;
-    buffer[9] = *float_pt++;
-    buffer[10] = *float_pt;
+    buffer[9] = *float_pt;
 
     // Timestamp
     uint32_t time = _localTimestamp;
-    buffer[11] = time & 0xFF;
-    buffer[12] = (time >> 8) & 0xFF;
-    buffer[13] = (time >> 16) & 0xFF;
-    buffer[14] = (time >> 24) & 0xFF;
+    buffer[10] = time & 0xFF;
+    buffer[11] = (time >> 8) & 0xFF;
+    buffer[12] = (time >> 16) & 0xFF;
+    buffer[13] = (time >> 24) & 0xFF;
 
-    return _fifo->push_data( buffer, 15 );
+    return _fifo_alarms->push_data( buffer, FRAME_DATA_SIZE );
 }
 
 void CloudMonitor24Eth::calcLocalTimestamp()
@@ -543,10 +564,10 @@ byte CloudMonitor24Eth::readFrameFromSocket()
     return frameTypeReceived;
 }
 
-boolean CloudMonitor24Eth::writeDataToNetwork(byte *buffer, byte size )
+boolean CloudMonitor24Eth::writeDataToNetwork(byte *buffer, byte size, byte ftype)
 {
-    // Data should always be 15 bytes!
-    if (size != sizeof(Cm24FrameData)-3)
+    // Data should always be FRAME_DATA_SIZE bytes!
+    if (size != sizeof(Cm24FrameData)-4)
     {
         return false;
     }
@@ -557,7 +578,8 @@ boolean CloudMonitor24Eth::writeDataToNetwork(byte *buffer, byte size )
         _dataFrame.data[t] = buffer[t];
     }
 
-    _dataFrame.chk = getChecksum( _dataFrame.data, sizeof(Cm24FrameData)-3  );
+    _dataFrame.ftype = ftype;
+    _dataFrame.chk = getChecksum( &(_dataFrame.ftype), sizeof(Cm24FrameData)-3  );
 
     if (_channel->write((byte *)&_dataFrame, sizeof(Cm24FrameData)) == 0)
     {
