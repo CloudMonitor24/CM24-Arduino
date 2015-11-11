@@ -10,8 +10,7 @@
 #define CM24_FRAME_TYPE_KEEP_ALIVE      2
 #define CM24_FRAME_TYPE_ACK             3
 #define CM24_FRAME_TYPE_NOT_ACK         4
-#define CM24_FRAME_TYPE_TIME_REQUEST    5
-#define CM24_FRAME_TYPE_TIME_ANSWER     6
+#define CM24_FRAME_TYPE_COMMAND         5
 
 #define CM24_FRAME_TYPE_ALARM           100
 #define CM24_FRAME_TYPE_VARIABLE        101
@@ -19,11 +18,11 @@
 #define CM24_MAGIC_START_CH             0x55
 #define CM24_MAGIC_END_CH               0xAA
 
-#define CM24_SOCKET_URL                 "data.cloudmonitor24.com"
+#define CM24_SOCKET_URL                 "iot.cloudmonitor24.com"
 #define CM24_SOCKET_PORT                3503
 #define CM24_TIMEOUT_SEND_KEEP_ALIVE    240000  // millis (4 minutes)
 #define CM24_TIMEOUT_WAIT_ACK           10000   // millis
-#define CM24_TIMEOUT_WAIT_RECONNECT     60000   // millis
+#define CM24_TIMEOUT_WAIT_RECONNECT     60000    // millis
 
 #define FRAME_DATA_SIZE     14
 
@@ -109,13 +108,13 @@ void CloudMonitor24Eth::loop()
         case CM24_WAIT_CONNECT:
         {
             if(_channel->connected())
-            {                
+            {
                 _channel->flush();
                 // Launch identification packet
                 _startFrame.timestamp = _localTimestamp;
                 _startFrame.chk = getChecksum( &_startFrame.frame_type, sizeof(Cm24FrameIdentifier)-3 );
                 if (_channel->write((byte *)&_startFrame, sizeof(Cm24FrameIdentifier)) > 0)
-                {                    
+                {
                     startWaitingTimeAck = millis();
                     lastFrameTypeSent = _startFrame.frame_type;
                     _cm24LoggerState = CM24_WAIT_ACK;
@@ -174,7 +173,7 @@ void CloudMonitor24Eth::loop()
                         lastFrameSizeSent = size;
 
                         //save last frame-type sent, reading on "popped" data
-                        lastFrameTypeSent = buffer[0];
+                        lastFrameTypeSent = frameType;
                     }
                     else
                     {
@@ -197,7 +196,6 @@ void CloudMonitor24Eth::loop()
                             startWaitingTimeAck = millis();
                             lastFrameTypeSent = CM24_FRAME_TYPE_KEEP_ALIVE;
                             lastTimeDataSent = millis();
-
                         }
                         else
                         {
@@ -255,7 +253,7 @@ void CloudMonitor24Eth::loop()
                             switch(lastFrameTypeSent)
                             {
                                 case CM24_FRAME_TYPE_IDENTIFYING:
-                                {                                    
+                                {
                                     break;
                                 }
                                 case CM24_FRAME_TYPE_KEEP_ALIVE:
@@ -279,10 +277,7 @@ void CloudMonitor24Eth::loop()
                                 {
                                     break;
                                 }
-                                case CM24_FRAME_TYPE_TIME_REQUEST:
-                                {
-                                    break;
-                                }*/
+                                */
                                
                             }
                             
@@ -309,7 +304,7 @@ void CloudMonitor24Eth::loop()
         }
 
         case CM24_WAIT_RECONNECT:
-        {          
+        {
             if( (millis() - startWaitingTimeReconnect) > CM24_TIMEOUT_WAIT_RECONNECT )
             {
                 _cm24LoggerState = CM24_WAIT_CONNECT;

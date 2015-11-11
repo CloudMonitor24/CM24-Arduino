@@ -65,6 +65,16 @@ typedef struct
   byte end;
 } Cm24FrameData;
 
+typedef struct 
+{
+  byte start;
+  byte ftype;
+  byte size;
+  byte data[64];
+  byte chk;
+  byte end;
+} Cm24FrameCommand;
+
 typedef struct
 {
   byte start;
