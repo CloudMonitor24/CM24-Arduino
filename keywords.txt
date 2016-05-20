@@ -1,31 +1,80 @@
-##############################################
-# Syntax Coloring Map For CloudMonitor24Eth  #
-##############################################
+#########################################################################################
+# Syntax Coloring Map For CloudMonitor24                                                #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# Each line has the name of the keyword, followed by a tab (not spaces),                #
+# followed by the kind of keyword. Classes should be KEYWORD1 and are colored orange;   #
+# functions should be KEYWORD2 and will be brown. You will have to restart the Arduino  #
+# environment to get it to recognize the new keywords.                                  #
+#########################################################################################
 
-####################
-# Class (KEYWORD3)
-####################
-
-CloudMonitor24Eth	KEYWORD1
-
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-
-logVariable	KEYWORD2
-logAlarm	KEYWORD2
-setSdCardFolder	KEYWORD2
-
-
-
+cm24_init	KEYWORD2
+cm24_log_variable	KEYWORD2
+cm24_log_alarm	KEYWORD2
+cm24_register_command_callback	KEYWORD2
+cm24_arduino_loop	KEYWORD2
+	
 #######################################
 # Constants (LITERAL1)
 #######################################
+VAR	LITERAL1
+VAR_	LITERAL1
+VAR_I	LITERAL1
+VAR_ID	LITERAL1
+VAR_ID_	LITERAL1
 
-CM24_FRAME_TYPE_IDENTIFYING	LITERAL1
+VAR_ID_LATITUDE	LITERAL1
+VAR_ID_LONGITUDE	LITERAL1
+VAR_ID_SPEED	LITERAL1
+VAR_ID_GPS_HEADING	LITERAL1
+VAR_ID_GPS_NUM_SAT	LITERAL1
+VAR_ID_BATTERY_CHARGE	LITERAL1
 VAR_ID_TEMPERATURE	LITERAL1
+VAR_ID_SOLAR_RADIATON	LITERAL1
+VAR_ID_CURRENT	LITERAL1
+VAR_ID_OUTPUT_ENERGY	LITERAL1
+VAR_ID_INPUT_ENERGY	LITERAL1
+VAR_ID_POWER	LITERAL1
+VAR_ID_DATALOGGER_BATT_VOLT	LITERAL1
+VAR_ID_DEVICE_DIG_IN1	LITERAL1
+VAR_ID_DEVICE_DIG_IN2	LITERAL1
+VAR_ID_DEVICE_DIG_IN3	LITERAL1
+VAR_ID_DEVICE_DIG_IN4	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN1	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN2	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN3	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN4	LITERAL1
+VAR_ID_ALTITUDE	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN5	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN6	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN7	LITERAL1
+VAR_ID_DEVICE_ANALOG_IN8	LITERAL1
 VAR_ID_HUMIDITY	LITERAL1
 VAR_ID_PRESSURE	LITERAL1
-VAR_ID_SOLAR_RADIATON	LITERAL1
+VAR_ID_DEVICE_DIG_OUT1	LITERAL1
+VAR_ID_DEVICE_DIG_OUT2	LITERAL1
+VAR_ID_DEVICE_DIG_OUT3	LITERAL1
+VAR_ID_DEVICE_DIG_OUT4	LITERAL1
+VAR_ID_COUNTER	LITERAL1
+VAR_ID_PWM_OUT1	LITERAL1
+VAR_ID_PWM_OUT2	LITERAL1
+VAR_ID_PWM_OUT3	LITERAL1
+VAR_ID_PWM_OUT4	LITERAL1
+VAR_ID_ACCELERATION_X	LITERAL1
+VAR_ID_ACCELERATION_Y	LITERAL1
+VAR_ID_ACCELERATION_Z	LITERAL1
+VAR_ID_AMBIENT_LIGHT	LITERAL1
+
 ALARM_ID_USER_ALARM	LITERAL1
+ALARM_ID_INTERNAL_BATT_LOW	LITERAL1
+ALARM_ID_STORAGE_FULL	LITERAL1
+ALARM_ID_DATALOGGER_TAMPER	LITERAL1
+
+
+
