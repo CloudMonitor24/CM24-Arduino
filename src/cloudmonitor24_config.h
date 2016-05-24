@@ -27,10 +27,13 @@
 #define _CLOUDMONITOR24_CONFIG_H
 
 // Number of elements on alarm buffer
+#ifndef CM24_BUFFER_ALARM_SIZE
 #define CM24_BUFFER_ALARM_SIZE		5
+#endif
 
 // Number of elements on variable buffer
+#ifndef CM24_BUFFER_VAR_SIZE
 #define CM24_BUFFER_VAR_SIZE		50
-
+#endif
 
 #endif

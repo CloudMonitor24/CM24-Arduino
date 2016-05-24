@@ -21,6 +21,8 @@
  * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Documentation available at http://www.cloudmonitor24.com/it/iot/docs
  */
 
 //Required
@@ -43,13 +45,13 @@
 #define SENSOR_ID_HUMIDITY            223
 #define SENSOR_ID_PRESSURE            224
 #define SENSOR_ID_LIGHT               225
-#define TIMEOUT_LOGGING             30000
+#define TIMEOUT_LOGGING             60000
 #define TIMEOUT_SAMPLING             1000
 #define READ_VALUE_ERROR               -1
 #define BUILT_IN_LED_PIN               13
 #define BUILT_IN_LED2_PIN               7
-#define WSHIELD_SENSOR_LIGHT_PIN     A1
-#define WSHIELD_3_3_V_PIN            A3 //3.3V pin for light/v partition
+#define WSHIELD_SENSOR_LIGHT_PIN       A1
+#define WSHIELD_3_3_V_PIN              A3 //3.3V pin for light/v partition
 
 //Variables
 MPL3115A2 sensorPressure; //Create an instance of the pressure sensor
@@ -189,7 +191,6 @@ void loop()
   }
 
   cm24_arduino_loop();
-
 }
 
 float get_light_level()
@@ -201,18 +202,18 @@ float get_light_level()
   return(lightSensor);
 }
 
-void command_received(char *test)
+void command_received(char *command)
 {
-  if(sizeof(test) > 0)
+  if(sizeof(command) > 0)
   {
     //sending 1 or a from CM24 platform will turn on build in led
-    if((test[0] == '1') || (test[0] == 'a'))
+    if((command[0] == '1') || (command[0] == 'a'))
     {
       digitalWrite(BUILT_IN_LED_PIN, HIGH);
     }
 
     //sending 0 or s from CM24 platform will turn on build in led
-    else if((test[0] == '0') || (test[0] == 's'))
+    else if((command[0] == '0') || (command[0] == 's'))
     {
       digitalWrite(BUILT_IN_LED_PIN, LOW);
     }

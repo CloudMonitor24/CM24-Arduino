@@ -21,6 +21,8 @@
  * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Documentation available at http://www.cloudmonitor24.com/it/iot/docs
  */
 
 //Required
@@ -66,7 +68,7 @@ void loop()
   cm24_arduino_loop();
 }
 
-void command_received(char *test)
+void command_received(char *command)
 {
-    //test will contain string sended by cm24 platform
+    //command will contain string sended by cm24 platform
 }

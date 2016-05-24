@@ -21,6 +21,8 @@
  * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Documentation available at http://www.cloudmonitor24.com/it/iot/docs
  */
 
 //Required
@@ -34,11 +36,11 @@
 #include "DHT.h"
 
 //Constants
-#define SENSOR_ID_TEMPERATURE       100
-#define SENSOR_ID_HUMIDITY          101
+#define SENSOR_ID_TEMPERATURE         100
+#define SENSOR_ID_HUMIDITY            101
 #define TIMEOUT_LOGGING             60000
-#define TIMEOUT_SAMPLING            1000
-#define READ_VALUE_ERROR            -1
+#define TIMEOUT_SAMPLING             1000
+#define READ_VALUE_ERROR               -1
 
 #define BUILT_IN_LED_PIN    9
 #define DHT_PIN            A0
@@ -156,7 +158,7 @@ float getHumidityFromDHT()
   }
 }
 
-void command_received(char *test)
+void command_received(char *command)
 {
-    //test will contain string sended by cm24 platform
+    //command will contain string sended by cm24 platform
 }
