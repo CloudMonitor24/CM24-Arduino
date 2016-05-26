@@ -35,6 +35,7 @@ cm24_register_command_callback( my_callback_function );
 Init of the library should be done within *setup* function of your sketch. This is the place where you have to specify your plant identifier and tokens. During the setup execution you can also specifiy a custom remote command callback, which is a function called every time CloudMonitor24 platform sends a command to the board.
 
 
+
 ###### Loop function
 ```c++
 void loop()
@@ -48,6 +49,7 @@ CloudMonitor24 loop function must be called within standard sketch loop function
 **NOTE**: try to avoid as much as possible any blocking operation within the main sketch loop function. If loop function is blocked by any other function, CloudMonitor24 Arduino Library cannot transfer local data to the platform nor receive any command.
 
 
+
 ###### Logging variables or alarms
 ```c++
 cm24_log_variable( uint32_t VARIABLE_ID, float value, uint16_t sensor_id );
@@ -56,6 +58,7 @@ cm24_log_alarm( uint32_t ALARM_ID, float value, uint16_t sensor_id );
 Logging variables and alarms have not been so easy! Just call *cm24_log_variable* and *cm24_log_alarm* function. The library will localy save the value of the variable or the code of the alarm and transfer it to the cloud platform as soon as possibile.
 
 **NOTE**: you should always place a delay between two log function calls. Logging at the maximum speed without any delay will lead to fill local buffer and lose data.
+
 
 
 ###### Receiving remote commands
