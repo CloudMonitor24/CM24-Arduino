@@ -73,3 +73,7 @@ Remote commands are a very interesting feature of the library, because they gran
 In order to receive remote commands, you firstly have to register a callback function during the setup process. This function will be called every time your board receives a remote command.<br>
 
 If you want to disable remote commands you can both avoid to specifiy the command callback or pass an empty command token to the *cm24_init* function.
+<br><br>
+## Documentation
+You can read more about CloudMonitor24 Arduino Library on the [official documentation](http://www.cloudmonitor24.com/it/iot/docs#arduino)
+
